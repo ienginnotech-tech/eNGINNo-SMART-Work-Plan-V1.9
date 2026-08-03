@@ -956,10 +956,11 @@ textarea.fi{resize:vertical;min-height:65px;}
       </div>
 
       <!-- Filter bar -->
-      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
         <select id="ins-filter-bu" class="fi" style="width:160px;padding:5px 8px;" onchange="renderInspect()">
           <option value="">All BU / หน่วยงาน</option>
         </select>
+        <button onclick="openAddBUModal()" style="padding:5px 12px;background:rgba(0,245,255,0.08);border:1px solid rgba(0,245,255,0.3);border-radius:8px;color:var(--cyan);font-size:0.72rem;cursor:pointer;white-space:nowrap;font-family:Sarabun,sans-serif;font-weight:600;">➕ เพิ่มหน่วยงาน</button>
         <select id="ins-filter-criteria" class="fi" style="width:150px;padding:5px 8px;" onchange="renderInspect()">
           <option value="">All Criteria</option>
           <option value="Emergency">🚨 Emergency</option>
@@ -1921,6 +1922,61 @@ textarea.fi{resize:vertical;min-height:65px;}
     <button class="btn btn-r" onclick="closeModal('modal-psd')">Cancel</button>
     <button class="btn btn-c" onclick="exportPSDForm()">📄 Export PDF View</button>
     <button class="btn btn-g" onclick="savePSD()">💾 Save PSD Analysis</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ MODAL: ADD / MANAGE BU ══ -->
+<div class="modal" id="modal-addbu">
+<div class="modal-box" style="max-width:520px;">
+  <div class="modal-hdr">
+    <h3 style="color:var(--cyan);">🏢 จัดการหน่วยงาน / อาคาร</h3>
+    <button class="modal-close" onclick="closeModal('modal-addbu')">×</button>
+  </div>
+
+  <!-- Add new BU form -->
+  <div style="background:rgba(0,245,255,0.04);border:1px solid rgba(0,245,255,0.2);border-radius:10px;padding:14px;margin-bottom:14px;">
+    <div style="font-size:0.72rem;font-weight:700;color:var(--cyan);margin-bottom:10px;">➕ เพิ่มหน่วยงาน / อาคารใหม่</div>
+    <div class="fg3">
+      <div class="fg">
+        <label class="fl">Code / รหัส *</label>
+        <input type="text" id="bu-new-code" class="fi" placeholder="เช่น C1, BLD-A, T3...">
+      </div>
+      <div class="fg">
+        <label class="fl">ชื่อหน่วยงาน / อาคาร *</label>
+        <input type="text" id="bu-new-name" class="fi" placeholder="เช่น อาคาร A, Township 1...">
+      </div>
+      <div class="fg">
+        <label class="fl">Icon (Emoji)</label>
+        <input type="text" id="bu-new-icon" class="fi" placeholder="🏢" maxlength="4" style="text-align:center;font-size:1.2rem;">
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">หมายเหตุ / กลุ่มธุรกิจ</label>
+      <input type="text" id="bu-new-note" class="fi" placeholder="เช่น สำนักงานใหญ่, Retail Zone, Residential...">
+    </div>
+    <button onclick="addCustomBU()" style="width:100%;padding:9px;background:rgba(0,245,255,0.1);border:1px solid rgba(0,245,255,0.35);border-radius:8px;color:var(--cyan);font-size:0.8rem;font-weight:700;cursor:pointer;font-family:Sarabun,sans-serif;margin-top:4px;">
+      ➕ เพิ่มหน่วยงานนี้
+    </button>
+  </div>
+
+  <!-- Custom BU list -->
+  <div>
+    <div style="font-size:0.72rem;font-weight:700;color:var(--text2);margin-bottom:8px;">📋 หน่วยงานที่เพิ่มเอง</div>
+    <div id="custom-bu-list"></div>
+  </div>
+
+  <!-- Default BUs reference -->
+  <div style="margin-top:12px;">
+    <div style="font-size:0.7rem;color:var(--text3);margin-bottom:6px;">🏛️ หน่วยงานเริ่มต้น (ระบบ) — ใช้งานได้ทันทีไม่ต้องเพิ่ม</div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;">
+      ${''/* filled by JS */}
+      <div id="default-bu-tags"></div>
+    </div>
+  </div>
+
+  <div style="margin-top:14px;text-align:right;">
+    <button onclick="closeModal('modal-addbu')" class="btn btn-g">✓ ปิด</button>
   </div>
 </div>
 </div>
@@ -4980,6 +5036,118 @@ function checkAndHideFloatImport() {
     }
 }
 
+// ═══════════════════════════════════════════════════
+// CUSTOM BU / BUILDING MANAGEMENT
+// ═══════════════════════════════════════════════════
+var K_CUSTOM_BU = 'eng_custom_bu_v1';
+
+function loadCustomBUs() {
+    try { return JSON.parse(localStorage.getItem(K_CUSTOM_BU)) || []; } catch(e) { return []; }
+}
+function saveCustomBUs(list) {
+    try { localStorage.setItem(K_CUSTOM_BU, JSON.stringify(list)); } catch(e) {}
+}
+function getAllBUs() {
+    return STAKEHOLDERS.concat(ENGINNO_FNS).concat(loadCustomBUs());
+}
+
+function openAddBUModal() {
+    ['bu-new-code','bu-new-name','bu-new-note'].forEach(function(id){
+        var el = document.getElementById(id); if (el) el.value = '';
+    });
+    var ic = document.getElementById('bu-new-icon'); if (ic) ic.value = '🏢';
+    renderCustomBUList();
+    renderDefaultBUTags();
+    openModal('modal-addbu');
+}
+
+function addCustomBU() {
+    var code = (document.getElementById('bu-new-code').value||'').trim().toUpperCase();
+    var name = (document.getElementById('bu-new-name').value||'').trim();
+    var icon = (document.getElementById('bu-new-icon').value||'🏢').trim() || '🏢';
+    var note = (document.getElementById('bu-new-note').value||'').trim();
+    if (!code || !name) { showToast('กรุณากรอก Code และชื่อหน่วยงาน','warn'); return; }
+    if (getAllBUs().find(function(b){ return b.code===code; })) { showToast('⚠️ Code "'+code+'" มีอยู่แล้ว','warn'); return; }
+    var list = loadCustomBUs();
+    list.push({ code:code, name:name, icon:icon, note:note, color:'#6b7280', custom:true });
+    saveCustomBUs(list);
+    ['bu-new-code','bu-new-name','bu-new-note'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('bu-new-icon').value='🏢';
+    renderCustomBUList();
+    populateInspectBUs();
+    showToast('✅ เพิ่มหน่วยงาน "'+icon+' '+code+' '+name+'" แล้ว','success');
+}
+
+function deleteCustomBU(code) {
+    if (!confirm('ลบหน่วยงาน "'+code+'" ?')) return;
+    saveCustomBUs(loadCustomBUs().filter(function(b){ return b.code!==code; }));
+    renderCustomBUList();
+    populateInspectBUs();
+    renderInspect();
+    showToast('🗑️ ลบแล้ว','warn');
+}
+
+function renderCustomBUList() {
+    var cont = document.getElementById('custom-bu-list');
+    if (!cont) return;
+    var list = loadCustomBUs();
+    if (!list.length) {
+        cont.innerHTML='<div style="text-align:center;padding:14px;color:var(--text3);font-size:0.75rem;">ยังไม่มีหน่วยงานที่เพิ่มเอง</div>';
+        return;
+    }
+    cont.innerHTML = list.map(function(b) {
+        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);margin-bottom:6px;">' +
+            '<span style="font-size:1.1rem;flex-shrink:0;">'+b.icon+'</span>' +
+            '<div style="flex:1;min-width:0;">' +
+                '<span style="font-family:Orbitron,sans-serif;font-size:0.65rem;color:var(--cyan);margin-right:6px;">'+escHtml(b.code)+'</span>' +
+                '<span style="font-size:0.8rem;font-weight:600;color:var(--text);">'+escHtml(b.name)+'</span>' +
+                (b.note?'<div style="font-size:0.65rem;color:var(--text3);">'+escHtml(b.note)+'</div>':'') +
+            '</div>' +
+            '<button onclick="deleteCustomBU(\''+escHtml(b.code)+'\')" style="padding:3px 8px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:6px;color:var(--red);font-size:0.65rem;cursor:pointer;flex-shrink:0;">🗑️ ลบ</button>' +
+        '</div>';
+    }).join('');
+}
+
+function renderDefaultBUTags() {
+    var cont = document.getElementById('default-bu-tags');
+    if (!cont) return;
+    cont.innerHTML = STAKEHOLDERS.concat(ENGINNO_FNS).map(function(b) {
+        return '<span style="padding:2px 8px;border-radius:6px;font-size:0.62rem;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);">'+b.icon+' '+b.code+'</span>';
+    }).join(' ');
+}
+
+function populateInspectBUs() {
+    ['ins-bu','psd-bu','ins-filter-bu'].forEach(function(selId) {
+        var sel = document.getElementById(selId);
+        if (!sel) return;
+        var cur = sel.value;
+        sel.innerHTML = '<option value="">— เลือกหน่วยงาน —</option>';
+        // Default group
+        var grpD = document.createElement('optgroup');
+        grpD.label = '🏛️ หน่วยงานหลัก';
+        STAKEHOLDERS.concat(ENGINNO_FNS).forEach(function(s) {
+            var o = document.createElement('option');
+            o.value = s.code;
+            o.textContent = s.icon+' '+s.code+' · '+s.name;
+            grpD.appendChild(o);
+        });
+        sel.appendChild(grpD);
+        // Custom group
+        var custom = loadCustomBUs();
+        if (custom.length) {
+            var grpC = document.createElement('optgroup');
+            grpC.label = '🏢 หน่วยงาน/อาคาร (เพิ่มเอง)';
+            custom.forEach(function(s) {
+                var o = document.createElement('option');
+                o.value = s.code;
+                o.textContent = s.icon+' '+s.code+' · '+s.name+(s.note?' ('+s.note+')':'');
+                grpC.appendChild(o);
+            });
+            sel.appendChild(grpC);
+        }
+        if (cur) sel.value = cur;
+    });
+}
 
 var K_INSPECT = 'eng_inspect_v1';
 var K_PSD     = 'eng_psd_v1';
