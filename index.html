@@ -1131,6 +1131,41 @@ textarea.fi{resize:vertical;min-height:65px;}
         <div><h2>🔐 Admin Panel</h2><p>User Management · Approve / Reject</p></div>
       </div>
 
+      <!-- ══ DATA EXPORT / IMPORT — TOP ══ -->
+      <div class="card" style="border:2px solid rgba(0,245,255,0.5);background:rgba(0,245,255,0.04);margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <span style="font-size:1.4rem;">💾</span>
+          <div>
+            <div style="font-family:Orbitron,sans-serif;font-size:0.82rem;font-weight:700;color:var(--cyan);">Data Export / Import</div>
+            <div style="font-size:0.68rem;color:var(--text3);margin-top:2px;">ย้ายข้อมูลระหว่าง version · สำรองข้อมูล</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <!-- IMPORT -->
+          <div style="padding:16px;background:rgba(0,245,255,0.06);border:1px solid rgba(0,245,255,0.3);border-radius:12px;">
+            <div style="font-size:0.78rem;font-weight:700;color:var(--cyan);margin-bottom:6px;">📥 Import ข้อมูลจาก Backup</div>
+            <div style="font-size:0.7rem;color:var(--text3);margin-bottom:12px;line-height:1.6;">เลือกไฟล์ <code style="color:var(--cyan);">eNGINNo_data_backup.json</code><br>ที่ Export จาก v1.8 มา</div>
+            <label style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:linear-gradient(135deg,rgba(0,245,255,0.15),rgba(59,130,246,0.1));border:1px solid rgba(0,245,255,0.4);border-radius:10px;color:var(--cyan);font-size:0.85rem;font-weight:700;cursor:pointer;text-align:center;font-family:Sarabun,sans-serif;box-sizing:border-box;">
+              📥 เลือกไฟล์ .json แล้ว Import
+              <input type="file" accept=".json" style="display:none;" onchange="importAllData(event)">
+            </label>
+            <div style="font-size:0.65rem;color:var(--text3);margin-top:8px;" id="import-info">—</div>
+          </div>
+          <!-- EXPORT -->
+          <div style="padding:16px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.25);border-radius:12px;">
+            <div style="font-size:0.78rem;font-weight:700;color:var(--green);margin-bottom:6px;">📤 Export ข้อมูลปัจจุบัน</div>
+            <div style="font-size:0.7rem;color:var(--text3);margin-bottom:12px;line-height:1.6;">บันทึกข้อมูลทั้งหมดเป็น<br>ไฟล์ backup ไว้ที่เครื่อง</div>
+            <button onclick="exportAllData()" style="width:100%;padding:12px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.4);border-radius:10px;color:var(--green);font-size:0.85rem;font-weight:700;cursor:pointer;font-family:Sarabun,sans-serif;">
+              📤 Export Backup (.json)
+            </button>
+            <div style="font-size:0.65rem;color:var(--text3);margin-top:8px;" id="export-info">—</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;padding:8px 12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:8px;font-size:0.68rem;color:var(--yellow);line-height:1.7;">
+          ⚠️ <strong>ทำไมข้อมูลหาย?</strong> Chrome แยก localStorage ตามชื่อไฟล์และ domain — v1.8 กับ v1.9 ใช้คนละ storage ครับ ให้ Import ไฟล์ .json ที่ได้จาก v1.8 เข้ามาได้เลย
+        </div>
+      </div>
+
       <!-- Pending approvals -->
       <div class="card" style="border-color:rgba(245,158,11,0.2);margin-bottom:14px;">
         <div class="card-hdr"><h3 style="color:var(--yellow);">⏳ Pending Approval</h3></div>
@@ -1151,6 +1186,52 @@ textarea.fi{resize:vertical;min-height:65px;}
             </tr></thead>
             <tbody id="admin-users-tbody"></tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- ══ DATA EXPORT / IMPORT ══ -->
+      <div class="card" style="border-color:rgba(0,245,255,0.3);background:rgba(0,245,255,0.03);">
+        <div class="card-hdr">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:1rem;">💾</span>
+            <h3 style="color:var(--cyan);">Data Export / Import</h3>
+            <span style="font-size:0.6rem;padding:2px 7px;border-radius:6px;background:rgba(0,245,255,0.12);color:var(--cyan);">ย้าย / สำรองข้อมูล</span>
+          </div>
+        </div>
+        <div style="padding:10px 12px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:8px;margin-bottom:14px;">
+          <div style="font-size:0.7rem;font-weight:700;color:var(--yellow);margin-bottom:4px;">⚠️ ทำไมข้อมูลถึงหาย?</div>
+          <div style="font-size:0.72rem;color:var(--text3);line-height:1.7;">
+            Chrome จะแยก localStorage ตาม <strong style="color:var(--text2);">ชื่อไฟล์</strong> — v1.8 และ v1.9 จึงเก็บข้อมูลแยกกัน<br>
+            ใช้ขั้นตอนด้านล่างเพื่อโอนข้อมูลจาก v1.8 → v1.9 ได้เลย
+          </div>
+        </div>
+
+        <!-- Step guide -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <!-- Export -->
+          <div style="padding:14px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:10px;">
+            <div style="font-size:0.72rem;font-weight:700;color:var(--green);margin-bottom:8px;">📤 Step 1 — Export จาก Version เก่า</div>
+            <div style="font-size:0.7rem;color:var(--text3);margin-bottom:10px;line-height:1.6;">กดปุ่มนี้ขณะเปิด v1.8 อยู่<br>ระบบจะดาวน์โหลดไฟล์ <code style="color:var(--cyan);">.json</code> มาให้</div>
+            <button onclick="exportAllData()" style="width:100%;padding:10px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.35);border-radius:8px;color:var(--green);font-size:0.8rem;font-weight:700;cursor:pointer;font-family:Sarabun,sans-serif;">
+              📤 Export ข้อมูลทั้งหมด (.json)
+            </button>
+            <div style="font-size:0.65rem;color:var(--text3);margin-top:6px;" id="export-info">—</div>
+          </div>
+          <!-- Import -->
+          <div style="padding:14px;background:rgba(0,245,255,0.04);border:1px solid rgba(0,245,255,0.2);border-radius:10px;">
+            <div style="font-size:0.72rem;font-weight:700;color:var(--cyan);margin-bottom:8px;">📥 Step 2 — Import เข้า Version ใหม่</div>
+            <div style="font-size:0.7rem;color:var(--text3);margin-bottom:10px;line-height:1.6;">กดปุ่มนี้ขณะเปิด v1.9 อยู่<br>เลือกไฟล์ <code style="color:var(--cyan);">.json</code> ที่ Export มา</div>
+            <label style="display:block;width:100%;padding:10px;background:rgba(0,245,255,0.08);border:1px solid rgba(0,245,255,0.35);border-radius:8px;color:var(--cyan);font-size:0.8rem;font-weight:700;cursor:pointer;text-align:center;font-family:Sarabun,sans-serif;box-sizing:border-box;">
+              📥 Import ข้อมูล (.json)
+              <input type="file" accept=".json" style="display:none;" onchange="importAllData(event)">
+            </label>
+            <div style="font-size:0.65rem;color:var(--text3);margin-top:6px;" id="import-info">—</div>
+          </div>
+        </div>
+
+        <!-- Quick backup reminder -->
+        <div style="margin-top:10px;padding:8px 12px;background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.15);border-radius:8px;font-size:0.68rem;color:var(--text3);line-height:1.6;">
+          💡 <strong style="color:var(--purple);">แนะนำ:</strong> Export ข้อมูลไว้เป็น Backup เป็นประจำทุกสัปดาห์ เผื่อ browser cache ถูกล้างหรือเปิดเครื่องใหม่
         </div>
       </div>
 
@@ -1842,6 +1923,14 @@ textarea.fi{resize:vertical;min-height:65px;}
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- ══ FLOATING IMPORT BUTTON (เห็นทุกหน้า) ══ -->
+<div id="float-import-btn" style="display:none;position:fixed;bottom:24px;right:20px;z-index:300;">
+  <label style="display:flex;align-items:center;gap:8px;padding:10px 18px;background:linear-gradient(135deg,#003a6b,#005a9c);border:1px solid rgba(0,245,255,0.5);border-radius:30px;color:#00f5ff;font-size:0.8rem;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,245,255,0.25);font-family:Sarabun,sans-serif;">
+    📥 Import ข้อมูล v1.8
+    <input type="file" accept=".json" style="display:none;" onchange="importAllData(event)">
+  </label>
+</div>
 
 <script>
 // ═══════════════════════════════════════════════════
@@ -3705,6 +3794,8 @@ function loginSuccess(user) {
         var tb = document.getElementById('mobile-tabbar');
         if (tb) tb.style.display = 'flex';
     }
+    // Show float import button if no data
+    setTimeout(checkAndHideFloatImport, 400);
 }
 
 // ── Register ──────────────────────────────────────
@@ -4502,6 +4593,7 @@ function getAIStatusHtml() {
 // Run on load
 window.addEventListener('DOMContentLoaded', function() {
     setTimeout(initApiKeySystem, 300);
+    setTimeout(checkAndHideFloatImport, 600);
 });
 
 // ═══════════════════════════════════════════════════
@@ -4557,8 +4649,75 @@ window.saveProgress = function() {
 };
 
 // ═══════════════════════════════════════════════════
-// INSPECTION & VISIT SITE
+// DATA EXPORT / IMPORT (ย้ายข้อมูลข้ามเวอร์ชัน)
 // ═══════════════════════════════════════════════════
+var EXPORT_KEYS = [
+    'eng_tasks','eng_progress','eng_toilet','eng_dmaic','eng_comments',
+    'eng_gs_url','eng_appsheet','eng_looker',
+    'eng_webapp_v1','eng_appsheet_v2','eng_looker_v2',
+    'eng_inspect_v1','eng_psd_v1',
+    'enginno_users','enginno_current_user',
+    'claude_api_key'
+];
+
+function exportAllData() {
+    var out = { _version:'eNGINNo_export_v1', _date:new Date().toISOString() };
+    var count = 0;
+    for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k) { out[k] = localStorage.getItem(k); count++; }
+    }
+    var blob = new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'eNGINNo_data_backup_' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    var el = document.getElementById('export-info');
+    if (el) el.innerHTML = '<span style="color:var(--green);">✅ Export '+count+' keys สำเร็จ</span>';
+    showToast('✅ Export '+count+' รายการแล้ว','success');
+}
+
+function importAllData(event) {
+    var file = event && event.target && event.target.files && event.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            var obj = JSON.parse(e.target.result);
+            var count = 0;
+            Object.keys(obj).forEach(function(k) {
+                if (k.startsWith('_')) return;
+                try { localStorage.setItem(k, obj[k]); count++; } catch(err) {}
+            });
+            var el = document.getElementById('import-info');
+            if (el) el.innerHTML = '<span style="color:var(--green);">✅ Import '+count+' รายการสำเร็จ</span>';
+            showToast('✅ Import '+count+' รายการสำเร็จ! กำลัง reload...','success');
+            setTimeout(function(){ window.location.reload(); }, 1500);
+        } catch(err) {
+            showToast('❌ อ่านไฟล์ไม่ได้: '+err.message,'error');
+        }
+    };
+    reader.readAsText(file);
+    if (event.target) event.target.value = '';
+}
+
+// Show float button after login
+function showFloatImport() {
+    var btn = document.getElementById('float-import-btn');
+    if (btn) btn.style.display = 'block';
+}
+// Hide when data already exists
+function checkAndHideFloatImport() {
+    var hasTasks = localStorage.getItem('eng_tasks');
+    var hasProgress = localStorage.getItem('eng_progress');
+    var btn = document.getElementById('float-import-btn');
+    if (btn) {
+        // Show only if no data yet
+        btn.style.display = (!hasTasks && !hasProgress) ? 'block' : 'none';
+    }
+}
+
+
 var K_INSPECT = 'eng_inspect_v1';
 var K_PSD     = 'eng_psd_v1';
 var _editInspectId = null;
