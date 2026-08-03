@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="eNGINNo">
 <meta name="theme-color" content="#060b14">
 <meta name="mobile-web-app-capable" content="yes">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Orbitron:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&family=Orbitron:wght@400;600;700;900&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -541,7 +541,10 @@ textarea.fi{resize:vertical;min-height:65px;}
         <div class="role" id="sb-role">—</div>
         <div style="font-size:0.58rem;color:var(--text3);margin-top:1px;" id="sb-dept">—</div>
       </div>
-      <button onclick="doLogout()" title="Logout" style="width:28px;height:28px;border-radius:7px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:var(--red);cursor:pointer;font-size:0.7rem;flex-shrink:0;">⏏</button>
+      <div style="display:flex;gap:5px;align-items:center;">
+        <button onclick="openSettings()" title="ตั้งค่า" style="width:28px;height:28px;border-radius:7px;background:rgba(0,245,255,0.08);border:1px solid rgba(0,245,255,0.2);color:var(--cyan);cursor:pointer;font-size:0.75rem;flex-shrink:0;" id="sb-settings-btn">⚙️</button>
+        <button onclick="doLogout()" title="Logout" style="width:28px;height:28px;border-radius:7px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:var(--red);cursor:pointer;font-size:0.7rem;flex-shrink:0;">⏏</button>
+      </div>
     </div>
   </div>
   <div class="sb-scroll">
@@ -1918,6 +1921,111 @@ textarea.fi{resize:vertical;min-height:65px;}
     <button class="btn btn-r" onclick="closeModal('modal-psd')">Cancel</button>
     <button class="btn btn-c" onclick="exportPSDForm()">📄 Export PDF View</button>
     <button class="btn btn-g" onclick="savePSD()">💾 Save PSD Analysis</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ MODAL: SETTINGS ══ -->
+<div class="modal" id="modal-settings">
+<div class="modal-box" style="max-width:480px;">
+  <div class="modal-hdr">
+    <h3 style="color:var(--cyan);">⚙️ ตั้งค่าการแสดงผล</h3>
+    <button class="modal-close" onclick="closeModal('modal-settings')">×</button>
+  </div>
+
+  <!-- THEME -->
+  <div style="margin-bottom:20px;">
+    <div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🎨 Theme / ธีม</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+      <!-- Original -->
+      <div id="theme-btn-original" onclick="setTheme('original')" style="cursor:pointer;border-radius:12px;overflow:hidden;border:2px solid rgba(0,245,255,0.5);transition:.2s;">
+        <div style="height:52px;background:linear-gradient(135deg,#060b14,#0d1525);display:flex;align-items:center;justify-content:center;">
+          <div style="width:14px;height:14px;border-radius:50%;background:#00f5ff;box-shadow:0 0 8px #00f5ff;"></div>
+        </div>
+        <div style="padding:6px 8px;background:#0d1525;text-align:center;">
+          <div style="font-size:0.68rem;font-weight:700;color:#00f5ff;">Original</div>
+          <div style="font-size:0.58rem;color:rgba(255,255,255,0.4);">Dark Cyan</div>
+        </div>
+      </div>
+      <!-- Blue -->
+      <div id="theme-btn-blue" onclick="setTheme('blue')" style="cursor:pointer;border-radius:12px;overflow:hidden;border:2px solid rgba(255,255,255,0.1);transition:.2s;">
+        <div style="height:52px;background:linear-gradient(135deg,#0a1628,#0f2347);display:flex;align-items:center;justify-content:center;">
+          <div style="width:14px;height:14px;border-radius:50%;background:#3b82f6;box-shadow:0 0 8px #3b82f6;"></div>
+        </div>
+        <div style="padding:6px 8px;background:#0f2347;text-align:center;">
+          <div style="font-size:0.68rem;font-weight:700;color:#60a5fa;">Navy Blue</div>
+          <div style="font-size:0.58rem;color:rgba(255,255,255,0.4);">Royal Blue</div>
+        </div>
+      </div>
+      <!-- Gray -->
+      <div id="theme-btn-gray" onclick="setTheme('gray')" style="cursor:pointer;border-radius:12px;overflow:hidden;border:2px solid rgba(255,255,255,0.1);transition:.2s;">
+        <div style="height:52px;background:linear-gradient(135deg,#18181b,#27272a);display:flex;align-items:center;justify-content:center;">
+          <div style="width:14px;height:14px;border-radius:50%;background:#a1a1aa;box-shadow:0 0 8px #a1a1aa;"></div>
+        </div>
+        <div style="padding:6px 8px;background:#27272a;text-align:center;">
+          <div style="font-size:0.68rem;font-weight:700;color:#d4d4d8;">Slate Gray</div>
+          <div style="font-size:0.58rem;color:rgba(255,255,255,0.4);">Neutral</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FONT SIZE -->
+  <div style="margin-bottom:20px;">
+    <div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">📐 ขนาดตัวอักษร</div>
+    <div style="display:flex;gap:8px;">
+      <button id="fsize-btn-small" onclick="setFontSize('small')" style="flex:1;padding:10px 6px;border-radius:10px;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);cursor:pointer;transition:.2s;font-family:inherit;">
+        <div style="font-size:0.68rem;color:var(--text2);margin-bottom:3px;">Aa</div>
+        <div style="font-size:0.65rem;color:var(--text3);">เล็ก (S)</div>
+      </button>
+      <button id="fsize-btn-medium" onclick="setFontSize('medium')" style="flex:1;padding:10px 6px;border-radius:10px;border:2px solid rgba(0,245,255,0.4);background:rgba(0,245,255,0.06);cursor:pointer;transition:.2s;font-family:inherit;">
+        <div style="font-size:0.85rem;color:var(--text);margin-bottom:3px;">Aa</div>
+        <div style="font-size:0.65rem;color:var(--cyan);">กลาง (M) ✓</div>
+      </button>
+      <button id="fsize-btn-large" onclick="setFontSize('large')" style="flex:1;padding:10px 6px;border-radius:10px;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);cursor:pointer;transition:.2s;font-family:inherit;">
+        <div style="font-size:1.05rem;color:var(--text2);margin-bottom:3px;">Aa</div>
+        <div style="font-size:0.65rem;color:var(--text3);">ใหญ่ (L)</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- FONT FAMILY -->
+  <div style="margin-bottom:20px;">
+    <div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🔤 รูปแบบตัวอักษร (Font)</div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <button id="font-btn-sarabun" onclick="setFont('sarabun')" style="padding:10px 14px;border-radius:10px;border:2px solid rgba(0,245,255,0.4);background:rgba(0,245,255,0.06);cursor:pointer;text-align:left;transition:.2s;font-family:'Sarabun',sans-serif;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <span style="font-size:0.88rem;font-weight:600;color:var(--text);font-family:'Sarabun',sans-serif;">Sarabun</span>
+            <span style="font-size:0.65rem;color:var(--cyan);margin-left:8px;">✓ ค่าเริ่มต้น</span>
+          </div>
+          <span style="font-size:0.75rem;color:var(--text2);font-family:'Sarabun',sans-serif;">สวัสดี Engineering</span>
+        </div>
+      </button>
+      <button id="font-btn-kanit" onclick="setFont('kanit')" style="padding:10px 14px;border-radius:10px;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);cursor:pointer;text-align:left;transition:.2s;font-family:'Kanit',sans-serif;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <span style="font-size:0.88rem;font-weight:600;color:var(--text);font-family:'Kanit',sans-serif;">Kanit</span>
+            <span style="font-size:0.65rem;color:var(--text3);margin-left:8px;">Modern Thai</span>
+          </div>
+          <span style="font-size:0.75rem;color:var(--text2);font-family:'Kanit',sans-serif;">สวัสดี Engineering</span>
+        </div>
+      </button>
+      <button id="font-btn-prompt" onclick="setFont('prompt')" style="padding:10px 14px;border-radius:10px;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);cursor:pointer;text-align:left;transition:.2s;font-family:'Prompt',sans-serif;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <span style="font-size:0.88rem;font-weight:600;color:var(--text);font-family:'Prompt',sans-serif;">Prompt</span>
+            <span style="font-size:0.65rem;color:var(--text3);margin-left:8px;">Clean & Round</span>
+          </div>
+          <span style="font-size:0.75rem;color:var(--text2);font-family:'Prompt',sans-serif;">สวัสดี Engineering</span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;justify-content:flex-end;">
+    <button onclick="resetSettings()" class="btn btn-r" style="font-size:0.72rem;">↺ รีเซ็ต</button>
+    <button onclick="closeModal('modal-settings')" class="btn btn-g" style="font-size:0.72rem;">✓ ปิด</button>
   </div>
 </div>
 </div>
@@ -4590,11 +4698,166 @@ function getAIStatusHtml() {
     return '<span style="font-size:0.58rem;padding:1px 6px;border-radius:4px;background:rgba(239,68,68,0.12);color:var(--red);margin-left:auto;">AI ❌</span>';
 }
 
+// ═══════════════════════════════════════════════════
+// SETTINGS — Theme / Font Size / Font Family
+// ═══════════════════════════════════════════════════
+var K_SETTINGS = 'eng_settings_v1';
+
+var THEMES = {
+  original: {
+    '--bg':'#060b14', '--bg2':'#0d1525', '--bg3':'#111827',
+    '--card':'rgba(255,255,255,0.03)',
+    '--cyan':'#00f5ff', '--purple':'#a855f7', '--green':'#10b981',
+    '--yellow':'#f59e0b', '--red':'#ef4444', '--blue':'#3b82f6',
+    '--orange':'#f97316', '--pink':'#ec4899',
+    '--text':'rgba(255,255,255,0.9)', '--text2':'rgba(255,255,255,0.55)', '--text3':'rgba(255,255,255,0.3)',
+    '--border':'rgba(255,255,255,0.08)',
+  },
+  blue: {
+    '--bg':'#050d1e', '--bg2':'#091630', '--bg3':'#0d1d3a',
+    '--card':'rgba(59,130,246,0.04)',
+    '--cyan':'#60a5fa', '--purple':'#818cf8', '--green':'#34d399',
+    '--yellow':'#fbbf24', '--red':'#f87171', '--blue':'#3b82f6',
+    '--orange':'#fb923c', '--pink':'#f472b6',
+    '--text':'rgba(255,255,255,0.92)', '--text2':'rgba(186,220,255,0.6)', '--text3':'rgba(147,197,253,0.35)',
+    '--border':'rgba(59,130,246,0.15)',
+  },
+  gray: {
+    '--bg':'#09090b', '--bg2':'#18181b', '--bg3':'#27272a',
+    '--card':'rgba(255,255,255,0.03)',
+    '--cyan':'#a1a1aa', '--purple':'#c084fc', '--green':'#4ade80',
+    '--yellow':'#facc15', '--red':'#f87171', '--blue':'#60a5fa',
+    '--orange':'#fb923c', '--pink':'#f9a8d4',
+    '--text':'rgba(255,255,255,0.9)', '--text2':'rgba(255,255,255,0.5)', '--text3':'rgba(255,255,255,0.28)',
+    '--border':'rgba(255,255,255,0.1)',
+  },
+};
+
+var FONT_SIZES = {
+  small:  { base:'13px', fi:'0.72rem', card:'0.7rem' },
+  medium: { base:'15px', fi:'0.78rem', card:'0.75rem' },
+  large:  { base:'17px', fi:'0.88rem', card:'0.82rem' },
+};
+
+var FONTS = {
+  sarabun: "'Sarabun', sans-serif",
+  kanit:   "'Kanit', sans-serif",
+  prompt:  "'Prompt', sans-serif",
+};
+
+function loadSettings() {
+  try { return JSON.parse(localStorage.getItem(K_SETTINGS)) || {}; } catch(e) { return {}; }
+}
+function saveSettings(s) {
+  try { localStorage.setItem(K_SETTINGS, JSON.stringify(s)); } catch(e) {}
+}
+
+function applyTheme(name) {
+  var t = THEMES[name] || THEMES.original;
+  var root = document.documentElement;
+  Object.keys(t).forEach(function(k) { root.style.setProperty(k, t[k]); });
+}
+
+function applyFontSize(size) {
+  var s = FONT_SIZES[size] || FONT_SIZES.medium;
+  document.documentElement.style.fontSize = s.base;
+  // patch .fi inputs
+  var style = document.getElementById('settings-font-style');
+  if (!style) { style = document.createElement('style'); style.id='settings-font-style'; document.head.appendChild(style); }
+  style.textContent = '.fi{font-size:'+s.fi+' !important;} .rpt-table td,.rpt-table th{font-size:'+s.card+' !important;} .sb-item .sl{font-size:'+s.card+' !important;}';
+}
+
+function applyFont(name) {
+  var f = FONTS[name] || FONTS.sarabun;
+  var style = document.getElementById('settings-family-style');
+  if (!style) { style = document.createElement('style'); style.id='settings-family-style'; document.head.appendChild(style); }
+  style.textContent = 'body,button,input,select,textarea,.fi,.btn,.sb-item,.sl,.task-title,.modal-box{font-family:'+f+' !important;}';
+}
+
+function applyAllSettings() {
+  var s = loadSettings();
+  applyTheme(s.theme || 'original');
+  applyFontSize(s.fontSize || 'medium');
+  applyFont(s.font || 'sarabun');
+  updateSettingsUI(s);
+}
+
+function updateSettingsUI(s) {
+  var theme = s.theme || 'original';
+  var fsize = s.fontSize || 'medium';
+  var font  = s.font || 'sarabun';
+
+  // Theme buttons
+  ['original','blue','gray'].forEach(function(t) {
+    var btn = document.getElementById('theme-btn-'+t);
+    if (!btn) return;
+    btn.style.border = t===theme ? '2px solid var(--cyan)' : '2px solid rgba(255,255,255,0.1)';
+    btn.style.transform = t===theme ? 'scale(1.04)' : 'scale(1)';
+    btn.style.boxShadow = t===theme ? '0 0 12px rgba(0,245,255,0.2)' : 'none';
+  });
+
+  // Font size buttons
+  ['small','medium','large'].forEach(function(sz) {
+    var btn = document.getElementById('fsize-btn-'+sz);
+    if (!btn) return;
+    btn.style.border = sz===fsize ? '2px solid var(--cyan)' : '2px solid rgba(255,255,255,0.1)';
+    btn.style.background = sz===fsize ? 'rgba(0,245,255,0.06)' : 'rgba(255,255,255,0.03)';
+    var label = btn.querySelector('div:last-child');
+    if (label) label.style.color = sz===fsize ? 'var(--cyan)' : 'var(--text3)';
+    if (label) label.textContent = { small:'เล็ก (S)', medium:'กลาง (M)', large:'ใหญ่ (L)' }[sz] + (sz===fsize?' ✓':'');
+  });
+
+  // Font buttons
+  ['sarabun','kanit','prompt'].forEach(function(f) {
+    var btn = document.getElementById('font-btn-'+f);
+    if (!btn) return;
+    btn.style.border = f===font ? '2px solid var(--cyan)' : '2px solid rgba(255,255,255,0.1)';
+    btn.style.background = f===font ? 'rgba(0,245,255,0.06)' : 'rgba(255,255,255,0.03)';
+    var badge = btn.querySelector('span:nth-child(2)');
+    if (badge) { badge.style.color = f===font ? 'var(--cyan)' : 'var(--text3)'; badge.textContent = f===font ? '✓ ใช้งานอยู่' : {sarabun:'ค่าเริ่มต้น',kanit:'Modern Thai',prompt:'Clean & Round'}[f]; }
+  });
+
+  // Update sidebar gear button color
+  var gb = document.getElementById('sb-settings-btn');
+  if (gb) gb.style.background = 'rgba(0,245,255,0.12)';
+}
+
+function setTheme(name) {
+  var s = loadSettings(); s.theme = name; saveSettings(s);
+  applyTheme(name); updateSettingsUI(s);
+  showToast('🎨 เปลี่ยน Theme เป็น '+name,'success');
+}
+
+function setFontSize(size) {
+  var s = loadSettings(); s.fontSize = size; saveSettings(s);
+  applyFontSize(size); updateSettingsUI(s);
+  showToast('📐 ขนาดตัวอักษร: '+{small:'เล็ก',medium:'กลาง',large:'ใหญ่'}[size],'success');
+}
+
+function setFont(name) {
+  var s = loadSettings(); s.font = name; saveSettings(s);
+  applyFont(name); updateSettingsUI(s);
+  showToast('🔤 Font: '+name,'success');
+}
+
+function resetSettings() {
+  localStorage.removeItem(K_SETTINGS);
+  applyAllSettings();
+  showToast('↺ รีเซ็ตการตั้งค่าแล้ว','success');
+}
+
+function openSettings() {
+  updateSettingsUI(loadSettings());
+  openModal('modal-settings');
+}
+
 // Run on load
 window.addEventListener('DOMContentLoaded', function() {
+    setTimeout(applyAllSettings, 50);
     setTimeout(initApiKeySystem, 300);
     setTimeout(checkAndHideFloatImport, 600);
 });
+
 
 // ═══════════════════════════════════════════════════
 // PROGRESS PHOTO UPLOAD
