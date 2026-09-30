@@ -185,8 +185,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Sarabu
   color:var(--text3);font-size:0.63rem;text-transform:uppercase;letter-spacing:.8px;
   white-space:nowrap;position:sticky;top:0;
 }
-.rpt-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
-.rpt-table tr:hover td{background:rgba(255,255,255,0.02);}
+.rpt-table td{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,0.05);vertical-align:top;}
+.rpt-table tr:hover td{background:rgba(255,255,255,0.025);}
+.rpt-detail-list{display:flex;flex-direction:column;gap:5px;}
+.rpt-detail-item{display:flex;gap:7px;align-items:flex-start;}
+.rpt-detail-num{flex-shrink:0;width:17px;height:17px;border-radius:50%;background:rgba(0,245,255,0.12);color:var(--cyan);font-size:0.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+.rpt-detail-text{flex:1;line-height:1.55;}
+.rpt-detail-lead{color:var(--text);font-weight:500;margin-bottom:3px;line-height:1.5;}
 
 .prog-bar{height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;width:80px;}
 .prog-fill{height:100%;border-radius:3px;transition:width .5s;}
@@ -2480,6 +2485,40 @@ function saveTask() {
 // ═══════════════════════════════════════════════════
 var _editProgressId = null;
 
+// ── Format multi-line / numbered-list text nicely for table cells ──
+function formatMultilineDetail(text) {
+    if (!text) return '<span style="color:var(--text3);">—</span>';
+    var raw = String(text);
+
+    // Split on real newlines first (textarea preserves \n)
+    var lines = raw.split(/\r?\n+/).map(function(l){ return l.trim(); }).filter(Boolean);
+
+    // Fallback: no newlines but has an inline numbered list like "1.xxx 2.yyy"
+    if (lines.length <= 1) {
+        var inline = raw.split(/(?=\d+[\.\)]\s?[A-Zก-๙])/g).map(function(l){ return l.trim(); }).filter(Boolean);
+        if (inline.length > 1) lines = inline;
+    }
+
+    if (lines.length <= 1) {
+        return '<span>'+escHtml(raw)+'</span>';
+    }
+
+    var html = '<div class="rpt-detail-list">';
+    lines.forEach(function(line) {
+        var m = line.match(/^(\d+)[\.\)]\s*(.*)$/);
+        if (m && m[2]) {
+            html += '<div class="rpt-detail-item">' +
+                '<span class="rpt-detail-num">'+m[1]+'</span>' +
+                '<span class="rpt-detail-text">'+escHtml(m[2])+'</span>' +
+            '</div>';
+        } else {
+            html += '<div class="rpt-detail-lead">'+escHtml(line)+'</div>';
+        }
+    });
+    html += '</div>';
+    return html;
+}
+
 function renderProgress() {
     var progs = load(K.progress);
     var tbody = document.getElementById('progress-tbody');
@@ -2494,19 +2533,19 @@ function renderProgress() {
         var sh = [...STAKEHOLDERS,...ENGINNO_FNS].find(function(s){ return s.code === p.sh; });
         var prog = parseInt(p.prog)||0;
         return '<tr>' +
-            '<td style="white-space:nowrap;font-size:0.7rem;color:var(--text3);">'+p.date+(p.time?' '+p.time:'')+'</td>' +
-            '<td style="font-weight:600;">'+p.task+'</td>' +
-            '<td style="max-width:200px;font-size:0.72rem;color:var(--text2);">'+(p.detail||'—')+'</td>' +
-            '<td>'+(sh?'<span class="badge b-c">'+sh.icon+' '+sh.code+'</span>':'—')+'</td>' +
-            '<td><span class="badge '+(prioColor[p.prio]||'b-b')+'">'+p.prio+'</span></td>' +
-            '<td><div class="prog-bar"><div class="prog-fill" style="width:'+prog+'%;background:'+progColor(prog)+';"></div></div><span style="font-size:0.65rem;color:'+progColor(prog)+';">'+prog+'%</span></td>' +
-            '<td style="font-size:0.72rem;">'+(p.result||'—')+'</td>' +
-            '<td style="font-size:0.72rem;">'+(p.by||'—')+'</td>' +
-            '<td style="font-size:0.72rem;">'+(p.follow||'—')+'</td>' +
-            '<td style="max-width:160px;font-size:0.7rem;color:var(--purple);">'+(p.execComment||'—')+'</td>' +
-            '<td style="white-space:nowrap;">' +
-                '<button class="btn btn-y" style="padding:2px 6px;font-size:0.6rem;margin-right:3px;" onclick="editProgress(\''+p.id+'\')">✏️</button>' +
-                '<button class="btn btn-r" style="padding:2px 6px;font-size:0.6rem;" onclick="deleteProgress(\''+p.id+'\')">🗑️</button>' +
+            '<td style="white-space:nowrap;font-size:0.7rem;color:var(--text3);padding-top:14px;">'+escHtml(p.date)+(p.time?'<br><span style="opacity:0.7;">'+escHtml(p.time)+'</span>':'')+'</td>' +
+            '<td style="font-weight:700;font-size:0.78rem;color:var(--text);min-width:130px;padding-top:14px;">'+escHtml(p.task)+'</td>' +
+            '<td style="min-width:260px;max-width:340px;font-size:0.74rem;color:var(--text2);">'+formatMultilineDetail(p.detail)+'</td>' +
+            '<td style="padding-top:14px;">'+(sh?'<span class="badge b-c">'+sh.icon+' '+sh.code+'</span>':'<span style="color:var(--text3);">—</span>')+'</td>' +
+            '<td style="padding-top:14px;"><span class="badge '+(prioColor[p.prio]||'b-b')+'">'+p.prio+'</span></td>' +
+            '<td style="min-width:90px;padding-top:14px;"><div class="prog-bar"><div class="prog-fill" style="width:'+prog+'%;background:'+progColor(prog)+';"></div></div><span style="font-size:0.68rem;color:'+progColor(prog)+';font-weight:600;">'+prog+'%</span></td>' +
+            '<td style="font-size:0.73rem;color:var(--text2);min-width:130px;padding-top:14px;line-height:1.5;">'+(p.result?escHtml(p.result):'<span style="color:var(--text3);">—</span>')+'</td>' +
+            '<td style="font-size:0.73rem;padding-top:14px;">'+(p.by?'<span style="color:var(--text2);">👤 '+escHtml(p.by)+'</span>':'<span style="color:var(--text3);">—</span>')+'</td>' +
+            '<td style="font-size:0.73rem;padding-top:14px;">'+(p.follow?'<span style="color:var(--text2);">📅 '+escHtml(p.follow)+'</span>':'<span style="color:var(--text3);">—</span>')+'</td>' +
+            '<td style="min-width:150px;max-width:220px;font-size:0.71rem;color:var(--purple);line-height:1.5;">'+(p.execComment?escHtml(p.execComment):'<span style="color:var(--text3);">—</span>')+'</td>' +
+            '<td style="white-space:nowrap;padding-top:14px;">' +
+                '<button class="btn btn-y" style="padding:3px 7px;font-size:0.62rem;margin-right:4px;" onclick="editProgress(\''+p.id+'\')">✏️</button>' +
+                '<button class="btn btn-r" style="padding:3px 7px;font-size:0.62rem;" onclick="deleteProgress(\''+p.id+'\')">🗑️</button>' +
             '</td>' +
             '</tr>';
     }).join('');
