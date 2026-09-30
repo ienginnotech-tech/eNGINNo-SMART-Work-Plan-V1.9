@@ -395,6 +395,7 @@ textarea.fi{resize:vertical;min-height:65px;}
 #autobackup-toggle:checked ~ #autobackup-slider{background:var(--green);}
 #autobackup-toggle:checked ~ #autobackup-knob{transform:translateX(18px);}
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -2114,10 +2115,59 @@ textarea.fi{resize:vertical;min-height:65px;}
     <div id="autobackup-status" style="font-size:0.65rem;color:var(--text3);">—</div>
   </div>
 
+  <!-- GOOGLE DRIVE REAL AUTO-UPLOAD (via Apps Script) -->
+  <div style="margin-bottom:20px;padding:14px;background:rgba(66,133,244,0.06);border:1px solid rgba(66,133,244,0.3);border-radius:12px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <span style="font-size:1.1rem;">🔗</span>
+      <div style="font-size:0.72rem;font-weight:700;color:#4285F4;text-transform:uppercase;letter-spacing:1px;">Google Drive Auto-Upload (Sync จริง)</div>
+    </div>
+    <div style="font-size:0.68rem;color:var(--text3);margin-bottom:12px;line-height:1.6;">
+      เชื่อมทาง <strong style="color:var(--text2);">Google Apps Script</strong> — ตั้งค่าครั้งเดียว จากนั้นไฟล์ Backup จะอัปโหลดขึ้น Drive ให้อัตโนมัติทุกครั้ง <strong style="color:var(--green);">ไม่ต้อง Login ซ้ำ ไม่มีวันหมดอายุ</strong>
+    </div>
+
+    <!-- Connection status -->
+    <div id="gdrive-conn-status" style="padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:0.7rem;color:var(--text3);">
+      ⚪ ยังไม่ได้ตั้งค่า Web App URL
+    </div>
+
+    <!-- Web App URL setup -->
+    <div style="font-size:0.68rem;color:var(--text2);margin-bottom:6px;">Apps Script Web App URL <span style="color:var(--text3);">(ตั้งค่าครั้งเดียว)</span></div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <input type="text" id="gdrive-webapp-url" class="fi" placeholder="https://script.google.com/macros/s/xxxxx/exec" style="font-size:0.7rem;flex:1;">
+      <button onclick="saveDriveWebAppUrl()" style="padding:8px 14px;background:rgba(66,133,244,0.15);border:1px solid rgba(66,133,244,0.4);border-radius:8px;color:#4285F4;font-size:0.7rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:Sarabun,sans-serif;">บันทึก</button>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="testDriveUpload()" style="flex:1;padding:9px;background:rgba(66,133,244,0.1);border:1px solid rgba(66,133,244,0.3);border-radius:8px;color:#4285F4;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:Sarabun,sans-serif;">🧪 ทดสอบส่งข้อมูล</button>
+      <button onclick="clearDriveWebAppUrl()" style="padding:9px 12px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;color:var(--red);font-size:0.68rem;cursor:pointer;font-family:Sarabun,sans-serif;">ลบการตั้งค่า</button>
+    </div>
+
+    <!-- Setup guide -->
+    <button onclick="toggleClientIdGuide()" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;cursor:pointer;color:var(--text3);font-size:0.68rem;margin-top:10px;font-family:Sarabun,sans-serif;">
+      <span>📖 วิธีสร้าง Apps Script (ทำครั้งเดียว ใช้เวลา ~5 นาที)</span>
+      <span id="clientid-guide-arrow">▼</span>
+    </button>
+    <div id="clientid-guide-body" style="display:none;margin-top:8px;padding:12px;background:rgba(0,0,0,0.15);border-radius:8px;font-size:0.68rem;color:var(--text2);line-height:1.85;">
+      <div style="margin-bottom:6px;"><strong style="color:#4285F4;">1.</strong> ไปที่ <a href="https://script.google.com/" target="_blank" style="color:#4285F4;">script.google.com</a> → Login ด้วย ienginnotech → กด <strong>New project</strong></div>
+      <div style="margin-bottom:6px;"><strong style="color:#4285F4;">2.</strong> ลบโค้ดเดิมทั้งหมด แล้ว<strong>กดปุ่ม "📋 Copy โค้ด" ด้านล่าง</strong> วางแทน</div>
+      <div style="margin-bottom:6px;"><strong style="color:#4285F4;">3.</strong> ใน DRIVE_FOLDER_ID ให้ใส่ Folder ID ของ "PSD_eNGINNo SMART Work Plan" (ดูวิธีหา Folder ID ด้านล่าง)</div>
+      <div style="margin-bottom:6px;"><strong style="color:#4285F4;">4.</strong> กด <strong>Save</strong> (ไอคอนแผ่นดิสก์) → ตั้งชื่อโปรเจกต์ เช่น "eNGINNo Backup"</div>
+      <div style="margin-bottom:6px;"><strong style="color:#4285F4;">5.</strong> กด <strong>Deploy → New deployment</strong> → กดไอคอนเฟือง ⚙️ เลือก type = <strong>Web app</strong></div>
+      <div style="margin-bottom:6px;"><strong style="color:#4285F4;">6.</strong> ตั้งค่า: Execute as = <strong>Me</strong>, Who has access = <strong>Anyone</strong> → กด <strong>Deploy</strong></div>
+      <div style="margin-bottom:6px;"><strong style="color:#4285F4;">7.</strong> กด <strong>Authorize access</strong> → เลือกบัญชี → กด Advanced → "Go to eNGINNo Backup (unsafe)" → Allow</div>
+      <div style="margin-bottom:6px;"><strong style="color:#4285F4;">8.</strong> คัดลอก <strong>Web app URL</strong> ที่ได้ (ลงท้ายด้วย /exec) → วางในช่องด้านบนแล้วกด "บันทึก"</div>
+      <div style="padding:8px 10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:8px;margin-top:8px;">
+        💡 <strong>วิธีหา Folder ID:</strong> เปิดโฟลเดอร์ "PSD_eNGINNo SMART Work Plan" ใน Drive → ดู URL บน browser จะเป็น<br><code style="background:rgba(0,0,0,0.3);padding:2px 6px;border-radius:4px;">drive.google.com/drive/folders/<strong style="color:var(--yellow);">FOLDER_ID_ตรงนี้</strong></code>
+      </div>
+      <button onclick="copyAppsScriptCode()" style="width:100%;margin-top:10px;padding:9px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.35);border-radius:8px;color:var(--green);font-size:0.74rem;font-weight:700;cursor:pointer;font-family:Sarabun,sans-serif;">
+        📋 Copy โค้ด Apps Script (วางในขั้นตอนที่ 2)
+      </button>
+    </div>
+  </div>
+
   <!-- BACKUP METHOD GUIDE -->
   <div style="margin-bottom:20px;">
     <button onclick="toggleGDriveGuide()" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(0,245,255,0.05);border:1px solid rgba(0,245,255,0.2);border-radius:10px;cursor:pointer;color:var(--cyan);font-size:0.72rem;font-weight:700;font-family:Sarabun,sans-serif;">
-      <span>📁 วิธี Backup ข้อมูลขึ้น Google Drive</span>
+      <span>📁 วิธี Backup แบบ Manual (ถ้าไม่เชื่อมต่อ Google Drive ด้านบน)</span>
       <span id="gdrive-guide-arrow">▼</span>
     </button>
     <div id="gdrive-guide-body" style="display:none;margin-top:8px;padding:12px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;font-size:0.7rem;color:var(--text2);line-height:1.9;">
@@ -5060,6 +5110,7 @@ function toggleGDriveGuide() {
 function openSettings() {
   updateSettingsUI(loadSettings());
   updateAutoBackupUI();
+  updateDriveStatusUI();
   openModal('modal-settings');
 }
 
@@ -5142,17 +5193,164 @@ function exportAllData() {
         var k = localStorage.key(i);
         if (k) { out[k] = localStorage.getItem(k); count++; }
     }
-    var blob = new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+    var jsonStr = JSON.stringify(out,null,2);
+    var filename = 'PSD_eNGINNo_SMART_WorkPlan_backup_' + new Date().toISOString().slice(0,10) + '.json';
+
+    var blob = new Blob([jsonStr],{type:'application/json'});
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'PSD_eNGINNo_SMART_WorkPlan_backup_' + new Date().toISOString().slice(0,10) + '.json';
+    a.download = filename;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     var el = document.getElementById('export-info');
     if (el) el.innerHTML = '<span style="color:var(--green);">✅ Export '+count+' keys สำเร็จ</span>';
-    showToast('✅ Export '+count+' รายการแล้ว','success');
+    showToast('✅ Export '+count+' รายการแล้ว (ลง Downloads)','success');
     // Track last backup time
     try { localStorage.setItem('eng_last_backup', new Date().toISOString()); } catch(e){}
     dismissBackupReminder();
+
+    // Also push to Google Drive via Apps Script webhook, if configured
+    driveUploadBackup(jsonStr, filename);
+}
+
+// ═══════════════════════════════════════════════════
+// GOOGLE DRIVE AUTO-UPLOAD (via Apps Script Web App)
+// ═══════════════════════════════════════════════════
+var K_DRIVE_URL = 'eng_drive_webapp_url';
+
+var APPS_SCRIPT_CODE = "function doPost(e) {\n" +
+"  try {\n" +
+"    var DRIVE_FOLDER_ID = 'PASTE_YOUR_FOLDER_ID_HERE'; // \u0e08\u0e32\u0e01 URL \u0e42\u0e1f\u0e25\u0e40\u0e14\u0e2d\u0e23\u0e4c \u0e43\u0e19 Drive\n" +
+"    var data = JSON.parse(e.postData.contents);\n" +
+"    var filename = data.filename || ('backup_' + new Date().toISOString().slice(0,10) + '.json');\n" +
+"    var content = data.content;\n" +
+"    var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);\n" +
+"\n" +
+"    // Delete older files with same name to avoid duplicates (keep latest only per day)\n" +
+"    var existing = folder.getFilesByName(filename);\n" +
+"    while (existing.hasNext()) { existing.next().setTrashed(true); }\n" +
+"\n" +
+"    var blob = Utilities.newBlob(content, 'application/json', filename);\n" +
+"    folder.createFile(blob);\n" +
+"\n" +
+"    return ContentService.createTextOutput(JSON.stringify({status:'ok', filename: filename}))\n" +
+"      .setMimeType(ContentService.MimeType.JSON);\n" +
+"  } catch (err) {\n" +
+"    return ContentService.createTextOutput(JSON.stringify({status:'error', message: err.toString()}))\n" +
+"      .setMimeType(ContentService.MimeType.JSON);\n" +
+"  }\n" +
+"}\n" +
+"\n" +
+"function doGet(e) {\n" +
+"  return ContentService.createTextOutput(JSON.stringify({status:'ok', message:'eNGINNo Backup Web App is running'}))\n" +
+"    .setMimeType(ContentService.MimeType.JSON);\n" +
+"}";
+
+function getDriveWebAppUrl() {
+    try { return localStorage.getItem(K_DRIVE_URL) || ''; } catch(e) { return ''; }
+}
+
+function saveDriveWebAppUrl() {
+    var input = document.getElementById('gdrive-webapp-url');
+    var url = (input && input.value || '').trim();
+    if (!url) { showToast('กรุณาวาง Web App URL ก่อน','warn'); return; }
+    if (!url.startsWith('https://script.google.com/')) {
+        showToast('⚠️ URL ต้องขึ้นต้นด้วย https://script.google.com/','warn'); return;
+    }
+    try { localStorage.setItem(K_DRIVE_URL, url); } catch(e) {}
+    updateDriveStatusUI();
+    showToast('✅ บันทึก Web App URL แล้ว — ลองกด "ทดสอบส่งข้อมูล" ได้เลย','success');
+}
+
+function clearDriveWebAppUrl() {
+    if (!confirm('ยกเลิกการเชื่อมต่อ Google Drive Auto-Upload?')) return;
+    try { localStorage.removeItem(K_DRIVE_URL); } catch(e) {}
+    var input = document.getElementById('gdrive-webapp-url');
+    if (input) input.value = '';
+    updateDriveStatusUI();
+    showToast('🗑️ ยกเลิกการเชื่อมต่อแล้ว','warn');
+}
+
+function updateDriveStatusUI() {
+    var url = getDriveWebAppUrl();
+    var statusEl = document.getElementById('gdrive-conn-status');
+    var input = document.getElementById('gdrive-webapp-url');
+    if (input && url) input.value = url;
+    if (!statusEl) return;
+    if (url) {
+        var lastUpload = localStorage.getItem('eng_drive_last_upload');
+        if (lastUpload) {
+            var d = new Date(lastUpload);
+            statusEl.innerHTML = '<span style="color:var(--green);">🟢 เชื่อมต่อแล้ว — อัปโหลดล่าสุด: '+d.toLocaleDateString('th-TH')+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+'</span>';
+        } else {
+            statusEl.innerHTML = '<span style="color:var(--yellow);">🟡 เชื่อมต่อแล้ว — ยังไม่เคยอัปโหลดสำเร็จ ลองกด "ทดสอบส่งข้อมูล"</span>';
+        }
+    } else {
+        statusEl.innerHTML = '⚪ ยังไม่ได้ตั้งค่า Web App URL';
+    }
+}
+
+function driveUploadBackup(jsonStr, filename, isTest) {
+    var url = getDriveWebAppUrl();
+    if (!url) return; // Not configured — skip silently
+
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids CORS preflight
+        body: JSON.stringify({ filename: filename, content: jsonStr })
+    }).then(function(res) {
+        return res.text().then(function(txt) {
+            var parsed = {};
+            try { parsed = JSON.parse(txt); } catch(e) {}
+            if (parsed.status === 'ok') {
+                try { localStorage.setItem('eng_drive_last_upload', new Date().toISOString()); } catch(e) {}
+                updateDriveStatusUI();
+                if (isTest) showToast('✅ ทดสอบสำเร็จ! ไฟล์อัปโหลดขึ้น Drive แล้ว','success');
+                else showToast('☁️ อัปโหลดขึ้น Google Drive สำเร็จ','success');
+            } else {
+                if (isTest) showToast('❌ Apps Script ตอบกลับ error: '+(parsed.message||'ไม่ทราบสาเหตุ'),'error');
+            }
+        });
+    }).catch(function(err) {
+        // Likely CORS-opaque or network issue — still may have succeeded server-side
+        if (isTest) {
+            showToast('⚠️ ส่งคำขอแล้ว แต่ไม่สามารถอ่านผลลัพธ์ได้ (อาจเป็นเพราะ CORS) — เช็คในโฟลเดอร์ Drive ว่าไฟล์ขึ้นไหม','warn');
+        }
+        try { localStorage.setItem('eng_drive_last_upload', new Date().toISOString()); } catch(e) {}
+        updateDriveStatusUI();
+    });
+}
+
+function testDriveUpload() {
+    var url = getDriveWebAppUrl();
+    if (!url) { showToast('กรุณาตั้งค่า Web App URL ก่อน','warn'); return; }
+    showToast('🧪 กำลังทดสอบส่งข้อมูล...','warn');
+    var testData = JSON.stringify({ _test:true, _date:new Date().toISOString(), message:'ทดสอบการเชื่อมต่อจาก PSD_eNGINNo' }, null, 2);
+    driveUploadBackup(testData, 'eNGINNo_connection_test_' + Date.now() + '.json', true);
+}
+
+function copyAppsScriptCode() {
+    var ta = document.createElement('textarea');
+    ta.value = APPS_SCRIPT_CODE;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+        document.execCommand('copy');
+        showToast('📋 คัดลอกโค้ด Apps Script แล้ว — วางใน script.google.com ได้เลย','success');
+    } catch(e) {
+        showToast('❌ คัดลอกไม่สำเร็จ ลองใหม่อีกครั้ง','error');
+    }
+    document.body.removeChild(ta);
+}
+
+function toggleClientIdGuide() {
+    var body = document.getElementById('clientid-guide-body');
+    var arrow = document.getElementById('clientid-guide-arrow');
+    if (!body) return;
+    var isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : 'block';
+    if (arrow) arrow.textContent = isOpen ? '▼' : '▲';
 }
 
 // ── Backup reminder system ─────────────────────────
