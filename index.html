@@ -2002,7 +2002,8 @@ textarea.fi{resize:vertical;min-height:65px;}
 
   <!-- THEME -->
   <div style="margin-bottom:20px;">
-    <div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">🎨 Theme / ธีม</div>
+    <div style="font-size:0.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">🎨 Theme / ธีม</div>
+    <div style="font-size:0.65rem;color:var(--text3);margin-bottom:10px;">Gray และ Blue เป็นโทนสว่างขึ้น สบายตากว่าพื้นดำล้วน</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
       <!-- Original -->
       <div id="theme-btn-original" onclick="setTheme('original')" style="cursor:pointer;border-radius:12px;overflow:hidden;border:2px solid rgba(0,245,255,0.5);transition:.2s;">
@@ -2011,27 +2012,27 @@ textarea.fi{resize:vertical;min-height:65px;}
         </div>
         <div style="padding:6px 8px;background:#0d1525;text-align:center;">
           <div style="font-size:0.68rem;font-weight:700;color:#00f5ff;">Original</div>
-          <div style="font-size:0.58rem;color:rgba(255,255,255,0.4);">Dark Cyan</div>
+          <div style="font-size:0.58rem;color:rgba(255,255,255,0.4);">พื้นดำ (Default)</div>
         </div>
       </div>
       <!-- Blue -->
       <div id="theme-btn-blue" onclick="setTheme('blue')" style="cursor:pointer;border-radius:12px;overflow:hidden;border:2px solid rgba(255,255,255,0.1);transition:.2s;">
-        <div style="height:52px;background:linear-gradient(135deg,#0a1628,#0f2347);display:flex;align-items:center;justify-content:center;">
-          <div style="width:14px;height:14px;border-radius:50%;background:#3b82f6;box-shadow:0 0 8px #3b82f6;"></div>
+        <div style="height:52px;background:linear-gradient(135deg,#1b2536,#2d3e56);display:flex;align-items:center;justify-content:center;">
+          <div style="width:14px;height:14px;border-radius:50%;background:#7dd3fc;box-shadow:0 0 8px #7dd3fc;"></div>
         </div>
-        <div style="padding:6px 8px;background:#0f2347;text-align:center;">
-          <div style="font-size:0.68rem;font-weight:700;color:#60a5fa;">Navy Blue</div>
-          <div style="font-size:0.58rem;color:rgba(255,255,255,0.4);">Royal Blue</div>
+        <div style="padding:6px 8px;background:#2d3e56;text-align:center;">
+          <div style="font-size:0.68rem;font-weight:700;color:#7dd3fc;">Soft Blue</div>
+          <div style="font-size:0.58rem;color:rgba(255,255,255,0.45);">พื้นฟ้า สบายตา</div>
         </div>
       </div>
       <!-- Gray -->
       <div id="theme-btn-gray" onclick="setTheme('gray')" style="cursor:pointer;border-radius:12px;overflow:hidden;border:2px solid rgba(255,255,255,0.1);transition:.2s;">
-        <div style="height:52px;background:linear-gradient(135deg,#18181b,#27272a);display:flex;align-items:center;justify-content:center;">
-          <div style="width:14px;height:14px;border-radius:50%;background:#a1a1aa;box-shadow:0 0 8px #a1a1aa;"></div>
+        <div style="height:52px;background:linear-gradient(135deg,#2a2a2e,#3e3e43);display:flex;align-items:center;justify-content:center;">
+          <div style="width:14px;height:14px;border-radius:50%;background:#d4d4d8;box-shadow:0 0 8px #d4d4d8;"></div>
         </div>
-        <div style="padding:6px 8px;background:#27272a;text-align:center;">
-          <div style="font-size:0.68rem;font-weight:700;color:#d4d4d8;">Slate Gray</div>
-          <div style="font-size:0.58rem;color:rgba(255,255,255,0.4);">Neutral</div>
+        <div style="padding:6px 8px;background:#3e3e43;text-align:center;">
+          <div style="font-size:0.68rem;font-weight:700;color:#e4e4e7;">Warm Gray</div>
+          <div style="font-size:0.58rem;color:rgba(255,255,255,0.45);">พื้นเทา สบายตา</div>
         </div>
       </div>
     </div>
@@ -4903,22 +4904,24 @@ var THEMES = {
     '--border':'rgba(255,255,255,0.08)',
   },
   blue: {
-    '--bg':'#050d1e', '--bg2':'#091630', '--bg3':'#0d1d3a',
-    '--card':'rgba(59,130,246,0.04)',
-    '--cyan':'#60a5fa', '--purple':'#818cf8', '--green':'#34d399',
-    '--yellow':'#fbbf24', '--red':'#f87171', '--blue':'#3b82f6',
-    '--orange':'#fb923c', '--pink':'#f472b6',
-    '--text':'rgba(255,255,255,0.92)', '--text2':'rgba(186,220,255,0.6)', '--text3':'rgba(147,197,253,0.35)',
-    '--border':'rgba(59,130,246,0.15)',
+    /* Soft slate-blue — noticeably lighter than pure black, easier on the eyes */
+    '--bg':'#1b2536', '--bg2':'#243247', '--bg3':'#2d3e56',
+    '--card':'rgba(147,197,253,0.055)',
+    '--cyan':'#7dd3fc', '--purple':'#a5b4fc', '--green':'#6ee7b7',
+    '--yellow':'#fcd34d', '--red':'#fca5a5', '--blue':'#93c5fd',
+    '--orange':'#fdba74', '--pink':'#f9a8d4',
+    '--text':'rgba(255,255,255,0.94)', '--text2':'rgba(203,224,255,0.72)', '--text3':'rgba(180,205,240,0.45)',
+    '--border':'rgba(147,197,253,0.18)',
   },
   gray: {
-    '--bg':'#09090b', '--bg2':'#18181b', '--bg3':'#27272a',
-    '--card':'rgba(255,255,255,0.03)',
-    '--cyan':'#a1a1aa', '--purple':'#c084fc', '--green':'#4ade80',
-    '--yellow':'#facc15', '--red':'#f87171', '--blue':'#60a5fa',
-    '--orange':'#fb923c', '--pink':'#f9a8d4',
-    '--text':'rgba(255,255,255,0.9)', '--text2':'rgba(255,255,255,0.5)', '--text3':'rgba(255,255,255,0.28)',
-    '--border':'rgba(255,255,255,0.1)',
+    /* Comfortable warm charcoal — mid-tone, much less harsh than pure black */
+    '--bg':'#2a2a2e', '--bg2':'#343438', '--bg3':'#3e3e43',
+    '--card':'rgba(255,255,255,0.055)',
+    '--cyan':'#d4d4d8', '--purple':'#d8b4fe', '--green':'#86efac',
+    '--yellow':'#fde047', '--red':'#fca5a5', '--blue':'#93c5fd',
+    '--orange':'#fdba74', '--pink':'#fbcfe8',
+    '--text':'rgba(255,255,255,0.95)', '--text2':'rgba(255,255,255,0.68)', '--text3':'rgba(255,255,255,0.42)',
+    '--border':'rgba(255,255,255,0.14)',
   },
 };
 
