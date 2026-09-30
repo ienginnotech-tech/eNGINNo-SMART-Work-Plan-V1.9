@@ -2208,9 +2208,9 @@ textarea.fi{resize:vertical;min-height:65px;}
   </label>
 </div>
 
-<!-- ══ FLOATING BACKUP BUTTON (เห็นทุกหน้า) ══ -->
-<button id="float-backup-btn" onclick="exportAllData()" title="Backup ข้อมูลทันที" style="display:none;position:fixed;top:72px;right:20px;z-index:300;align-items:center;gap:7px;padding:9px 16px;background:linear-gradient(135deg,rgba(16,185,129,0.2),rgba(16,185,129,0.1));border:1px solid rgba(16,185,129,0.4);border-radius:30px;color:var(--green);font-size:0.78rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(16,185,129,0.15);font-family:Sarabun,sans-serif;">
-  💾 Backup ด่วน
+<!-- ══ FLOATING BACKUP BUTTON (ลากวางตำแหน่งไหนก็ได้ เห็นทุกหน้า) ══ -->
+<button id="float-backup-btn" onclick="exportAllData()" title="Backup ข้อมูลทันที (ลากเพื่อย้ายตำแหน่ง)" style="display:none;position:fixed;top:auto;bottom:100px;right:16px;left:auto;z-index:300;align-items:center;gap:6px;padding:9px 16px 9px 10px;background:linear-gradient(135deg,rgba(16,185,129,0.22),rgba(16,185,129,0.12));border:1px solid rgba(16,185,129,0.4);border-radius:30px;color:var(--green);font-size:0.78rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(16,185,129,0.2);font-family:Sarabun,sans-serif;touch-action:none;user-select:none;">
+  <span style="opacity:0.55;font-size:0.85rem;line-height:1;cursor:grab;">⠿</span>💾 Backup ด่วน
 </button>
 
 <!-- ══ BACKUP REMINDER CARD (slide-in, non-intrusive) ══ -->
@@ -4092,7 +4092,13 @@ function loginSuccess(user) {
     }
     // Show float import button if no data
     setTimeout(checkAndHideFloatImport, 400);
-    setTimeout(function(){ updateFloatBackupBtn(); checkBackupReminder(); checkAutoBackupDue(); }, 800);
+    setTimeout(function(){
+        updateFloatBackupBtn();
+        checkBackupReminder();
+        checkAutoBackupDue();
+        initBackupButtonDrag();
+        restoreBackupButtonPosition();
+    }, 800);
 }
 
 // ── Register ──────────────────────────────────────
@@ -5421,6 +5427,110 @@ function updateFloatBackupBtn() {
     if (!btn) return;
     var hasData = localStorage.getItem('eng_tasks') || localStorage.getItem('eng_progress') || localStorage.getItem('eng_inspect_v1') || localStorage.getItem('eng_dmaic');
     btn.style.display = hasData ? 'flex' : 'none';
+}
+
+// ═══════════════════════════════════════════════════
+// DRAGGABLE FLOATING BACKUP BUTTON
+// ═══════════════════════════════════════════════════
+var K_BACKUP_BTN_POS = 'eng_backup_btn_pos';
+
+function restoreBackupButtonPosition() {
+    var btn = document.getElementById('float-backup-btn');
+    if (!btn) return;
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(K_BACKUP_BTN_POS)); } catch(e) {}
+    if (saved && typeof saved.top === 'number' && typeof saved.left === 'number') {
+        // Clamp to current viewport in case window was resized since saving
+        var maxLeft = window.innerWidth - btn.offsetWidth - 8;
+        var maxTop = window.innerHeight - btn.offsetHeight - 8;
+        var left = Math.min(Math.max(8, saved.left), Math.max(8, maxLeft));
+        var top  = Math.min(Math.max(8, saved.top), Math.max(8, maxTop));
+        btn.style.left = left + 'px';
+        btn.style.top = top + 'px';
+        btn.style.right = 'auto';
+        btn.style.bottom = 'auto';
+    }
+    // else: keep default CSS position (bottom-right) already set inline
+}
+
+function saveBackupButtonPosition(top, left) {
+    try { localStorage.setItem(K_BACKUP_BTN_POS, JSON.stringify({ top: top, left: left })); } catch(e) {}
+}
+
+function initBackupButtonDrag() {
+    var btn = document.getElementById('float-backup-btn');
+    if (!btn || btn._dragInit) return;
+    btn._dragInit = true;
+
+    var dragging = false, moved = false;
+    var startX = 0, startY = 0, startLeft = 0, startTop = 0;
+
+    function getRect() { return btn.getBoundingClientRect(); }
+
+    function onPointerDown(e) {
+        var p = e.touches ? e.touches[0] : e;
+        dragging = true; moved = false;
+        var rect = getRect();
+        // Switch to left/top-based positioning immediately
+        btn.style.left = rect.left + 'px';
+        btn.style.top = rect.top + 'px';
+        btn.style.right = 'auto';
+        btn.style.bottom = 'auto';
+        startX = p.clientX; startY = p.clientY;
+        startLeft = rect.left; startTop = rect.top;
+        document.addEventListener('mousemove', onPointerMove);
+        document.addEventListener('mouseup', onPointerUp);
+        document.addEventListener('touchmove', onPointerMove, { passive:false });
+        document.addEventListener('touchend', onPointerUp);
+    }
+
+    function onPointerMove(e) {
+        if (!dragging) return;
+        var p = e.touches ? e.touches[0] : e;
+        var dx = p.clientX - startX, dy = p.clientY - startY;
+        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) moved = true;
+        if (moved && e.cancelable) e.preventDefault();
+
+        var newLeft = startLeft + dx;
+        var newTop  = startTop + dy;
+        var maxLeft = window.innerWidth - btn.offsetWidth - 4;
+        var maxTop  = window.innerHeight - btn.offsetHeight - 4;
+        newLeft = Math.min(Math.max(4, newLeft), Math.max(4, maxLeft));
+        newTop  = Math.min(Math.max(4, newTop), Math.max(4, maxTop));
+
+        btn.style.left = newLeft + 'px';
+        btn.style.top = newTop + 'px';
+    }
+
+    function onPointerUp() {
+        if (!dragging) return;
+        dragging = false;
+        document.removeEventListener('mousemove', onPointerMove);
+        document.removeEventListener('mouseup', onPointerUp);
+        document.removeEventListener('touchmove', onPointerMove);
+        document.removeEventListener('touchend', onPointerUp);
+
+        if (moved) {
+            var rect = getRect();
+            saveBackupButtonPosition(rect.top, rect.left);
+            // Prevent the click event (which would trigger exportAllData) right after a drag
+            btn._suppressClick = true;
+            setTimeout(function(){ btn._suppressClick = false; }, 50);
+        }
+    }
+
+    btn.addEventListener('mousedown', onPointerDown);
+    btn.addEventListener('touchstart', onPointerDown, { passive:true });
+
+    // Intercept click to suppress it right after dragging
+    btn.addEventListener('click', function(e) {
+        if (btn._suppressClick) { e.preventDefault(); e.stopImmediatePropagation(); e.stopPropagation(); }
+    }, true);
+
+    // Re-clamp position on window resize
+    window.addEventListener('resize', function() {
+        restoreBackupButtonPosition();
+    });
 }
 
 function renderLastBackupStatus() {
